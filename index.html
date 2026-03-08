@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>С 8 Марта! 💐</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+background:#000;
+color:#ff69b4;
+font-family:'Courier New', monospace;
+overflow-x:hidden;
+min-height:100vh;
+}
+
+/* CANVAS */
+
+#matrix-canvas{
+position:fixed;
+top:0;
+left:0;
+z-index:1;
+}
+
+#particles-canvas{
+position:fixed;
+top:0;
+left:0;
+z-index:2;
+pointer-events:none;
+}
+
+/* CONTENT */
+
+.content{
+position:relative;
+z-index:10;
+min-height:100vh;
+display:none;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+padding:20px;
+}
+
+/* PHOTO GALLERY */
+
+.gallery{
+display:flex;
+gap:40px;
+flex-wrap:wrap;
+justify-content:center;
+margin-bottom:40px;
+}
+
+.main-photo-container{
+width:260px;
+height:260px;
+border-radius:50%;
+overflow:hidden;
+border:5px solid #ff69b4;
+
+box-shadow:
+0 0 30px #ff69b4,
+0 0 60px #ff1493,
+0 0 90px #ff69b4;
+
+animation:
+pulse 3s infinite,
+rotate 20s linear infinite;
+
+}
+
+.main-photo-container img{
+width:100%;
+height:100%;
+object-fit:cover;
+animation:photoZoom 5s ease-in-out infinite;
+}
+
+@keyframes rotate{
+from{transform:rotate(0)}
+to{transform:rotate(360deg)}
+}
+
+@keyframes pulse{
+0%,100%{transform:scale(1)}
+50%{transform:scale(1.1)}
+}
+
+@keyframes photoZoom{
+0%,100%{transform:scale(1)}
+50%{transform:scale(1.2)}
+}
+
+/* TITLE */
+
+.title{
+font-size:3rem;
+text-align:center;
+margin-bottom:40px;
+
+background:linear-gradient(
+45deg,
+#ff69b4,
+#ff1493,
+#ffb6c1,
+#ff69b4
+);
+
+background-size:300% 300%;
+
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+
+animation:gradient 5s infinite;
+}
+
+@keyframes gradient{
+0%{background-position:0%}
+50%{background-position:100%}
+100%{background-position:0%}
+}
+
+/* BIG HEART */
+
+.big-heart{
+display:none;
+font-size:8rem;
+margin-top:40px;
+
+animation:
+heartbeat 1s infinite,
+floatHeart 3s ease-in-out infinite;
+}
+
+@keyframes heartbeat{
+0%,100%{transform:scale(1)}
+50%{transform:scale(1.3)}
+}
+
+@keyframes floatHeart{
+0%,100%{transform:translateY(0)}
+50%{transform:translateY(-20px)}
+}
+
+/* LOADING */
+
+.loading{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:#000;
+z-index:9999;
+
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+}
+
+.loading-text{
+font-size:2rem;
+color:#ff69b4;
+margin-top:20px;
+animation:pulseLoad 1.5s infinite;
+}
+
+@keyframes pulseLoad{
+0%,100%{opacity:0.3}
+50%{opacity:1}
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- MUSIC -->
+<audio id="bgMusic" loop>
+<source src="music.mp3" type="audio/mpeg">
+</audio>
+
+<!-- LOADING -->
+
+<div class="loading" id="loading">
+
+<div style="font-size:4rem;">💐</div>
+
+<div class="loading-text">
+Загрузка сюрприза...
+</div>
+
+</div>
+
+<canvas id="matrix-canvas"></canvas>
+<canvas id="particles-canvas"></canvas>
+
+<div class="content" id="content">
+
+<h1 class="title">💐 С 8 МАРТА! 💐</h1>
+
+<!-- PHOTO GALLERY -->
+
+<div class="gallery">
+
+<div class="main-photo-container">
+<img src="101.jpg">
+</div>
+
+<div class="main-photo-container">
+<img src="102.jpg">
+</div>
+
+<div class="main-photo-container">
+<img src="103.jpg">
+</div>
+
+</div>
+
+<div class="big-heart" id="bigHeart">
+💗
+</div>
+
+</div>
+
+<script>
+
+/* MUSIC */
+
+const music = document.getElementById("bgMusic")
+
+document.body.addEventListener("click",()=>{
+
+music.volume = 0.5
+music.play()
+
+},{once:true})
+
+/* LOADING */
+
+setTimeout(()=>{
+
+gsap.to('#loading',{
+opacity:0,
+duration:1,
+onComplete:()=>{
+
+document.getElementById('loading').style.display='none'
+
+initAnimation()
+
+}
+
+})
+
+},2000)
+
+/* MATRIX */
+
+const canvas=document.getElementById("matrix-canvas")
+const ctx=canvas.getContext("2d")
+
+canvas.width=window.innerWidth
+canvas.height=window.innerHeight
+
+const letters="8МАРТА💐💗✨"
+const fontSize=16
+
+const columns=canvas.width/fontSize
+
+const drops=[]
+
+for(let i=0;i<columns;i++){
+
+drops[i]=Math.random()*-100
+
+}
+
+function drawMatrix(){
+
+ctx.fillStyle="rgba(0,0,0,0.05)"
+ctx.fillRect(0,0,canvas.width,canvas.height)
+
+ctx.fillStyle="#ff69b4"
+ctx.font=fontSize+"px monospace"
+
+for(let i=0;i<drops.length;i++){
+
+const text=letters[Math.floor(Math.random()*letters.length)]
+
+ctx.fillText(text,i*fontSize,drops[i]*fontSize)
+
+if(drops[i]*fontSize>canvas.height&&Math.random()>0.975){
+
+drops[i]=0
+
+}
+
+drops[i]++
+
+}
+
+}
+
+/* PARTICLES */
+
+const pCanvas=document.getElementById("particles-canvas")
+const pCtx=pCanvas.getContext("2d")
+
+pCanvas.width=window.innerWidth
+pCanvas.height=window.innerHeight
+
+const particles=[]
+
+class Particle{
+
+constructor(){
+
+this.reset()
+
+}
+
+reset(){
+
+this.x=Math.random()*pCanvas.width
+this.y=Math.random()*pCanvas.height
+this.size=Math.random()*3+1
+
+this.speedX=Math.random()*2-1
+this.speedY=Math.random()*2-1
+
+this.life=Math.random()*100+100
+
+}
+
+update(){
+
+this.x+=this.speedX
+this.y+=this.speedY
+this.life--
+
+if(this.life<=0){
+
+this.reset()
+
+}
+
+}
+
+draw(){
+
+pCtx.fillStyle="#ff69b4"
+
+pCtx.beginPath()
+pCtx.arc(this.x,this.y,this.size,0,Math.PI*2)
+
+pCtx.fill()
+
+}
+
+}
+
+for(let i=0;i<100;i++){
+
+particles.push(new Particle())
+
+}
+
+function animateParticles(){
+
+pCtx.clearRect(0,0,pCanvas.width,pCanvas.height)
+
+particles.forEach(p=>{
+
+p.update()
+p.draw()
+
+})
+
+requestAnimationFrame(animateParticles)
+
+}
+
+animateParticles()
+
+/* START ANIMATION */
+
+function initAnimation(){
+
+setInterval(drawMatrix,35)
+
+gsap.to("#matrix-canvas",{opacity:0.4})
+
+gsap.to("#content",{
+
+display:"flex",
+opacity:1,
+duration:1
+
+})
+
+gsap.from(".gallery",{
+
+scale:0,
+duration:2,
+ease:"back.out(1.7)"
+
+})
+
+setTimeout(()=>{
+
+document.getElementById("bigHeart").style.display="block"
+
+gsap.from("#bigHeart",{
+
+scale:0,
+rotation:720,
+duration:2,
+ease:"back.out(2)"
+
+})
+
+},4000)
+
+}
+
+window.addEventListener("resize",()=>{
+
+canvas.width=window.innerWidth
+canvas.height=window.innerHeight
+
+pCanvas.width=window.innerWidth
+pCanvas.height=window.innerHeight
+
+})
+
+</script>
+
+</body>
+</html>
