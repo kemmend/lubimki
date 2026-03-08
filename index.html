@@ -1,9 +1,12 @@
+```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>С 8 Марта! 💐</title>
+
+<title>С 8 Марта любимки Серёги! 💐</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
@@ -21,86 +24,76 @@ color:#ff69b4;
 font-family:'Courier New', monospace;
 overflow-x:hidden;
 min-height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+flex-direction:column;
 }
 
-/* CANVAS */
+/* ПОДСКАЗКА */
 
-#matrix-canvas{
+.hint{
 position:fixed;
-top:0;
-left:0;
-z-index:1;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+font-size:3rem;
+color:#ff69b4;
+text-shadow:
+0 0 20px #ff69b4,
+0 0 40px #ff1493;
+
+animation:blink 1.5s infinite;
+cursor:pointer;
+z-index:10000;
 }
 
-#particles-canvas{
-position:fixed;
-top:0;
-left:0;
-z-index:2;
-pointer-events:none;
+@keyframes blink{
+0%,100%{opacity:0.3}
+50%{opacity:1}
 }
 
-/* CONTENT */
+/* КОНТЕНТ */
 
 .content{
-position:relative;
-z-index:10;
-min-height:100vh;
 display:none;
 flex-direction:column;
 align-items:center;
-justify-content:center;
-padding:20px;
-}
-
-/* PHOTO GALLERY */
-
-.gallery{
-display:flex;
 gap:40px;
-flex-wrap:wrap;
-justify-content:center;
-margin-bottom:40px;
 }
 
-.main-photo-container{
-width:260px;
-height:260px;
-border-radius:50%;
+/* СЛАЙДЕР */
+
+.slider{
+width:320px;
+height:320px;
 overflow:hidden;
+border-radius:20px;
 border:5px solid #ff69b4;
 
 box-shadow:
 0 0 30px #ff69b4,
-0 0 60px #ff1493,
-0 0 90px #ff69b4;
+0 0 60px #ff1493;
 
-animation:
-pulse 3s infinite,
-rotate 20s linear infinite;
-
+position:relative;
 }
 
-.main-photo-container img{
+.slides{
+display:flex;
+width:300%;
+height:100%;
+transition:transform 1s;
+}
+
+.slide{
+width:100%;
+flex-shrink:0;
+}
+
+.slide img{
 width:100%;
 height:100%;
 object-fit:cover;
-animation:photoZoom 5s ease-in-out infinite;
-}
-
-@keyframes rotate{
-from{transform:rotate(0)}
-to{transform:rotate(360deg)}
-}
-
-@keyframes pulse{
-0%,100%{transform:scale(1)}
-50%{transform:scale(1.1)}
-}
-
-@keyframes photoZoom{
-0%,100%{transform:scale(1)}
-50%{transform:scale(1.2)}
 }
 
 /* TITLE */
@@ -108,17 +101,15 @@ to{transform:rotate(360deg)}
 .title{
 font-size:3rem;
 text-align:center;
-margin-bottom:40px;
 
 background:linear-gradient(
 45deg,
 #ff69b4,
 #ff1493,
-#ffb6c1,
-#ff69b4
+#ffb6c1
 );
 
-background-size:300% 300%;
+background-size:300%;
 
 -webkit-background-clip:text;
 -webkit-text-fill-color:transparent;
@@ -132,16 +123,11 @@ animation:gradient 5s infinite;
 100%{background-position:0%}
 }
 
-/* BIG HEART */
+/* HEART */
 
 .big-heart{
-display:none;
-font-size:8rem;
-margin-top:40px;
-
-animation:
-heartbeat 1s infinite,
-floatHeart 3s ease-in-out infinite;
+font-size:6rem;
+animation:heartbeat 1s infinite;
 }
 
 @keyframes heartbeat{
@@ -149,88 +135,62 @@ floatHeart 3s ease-in-out infinite;
 50%{transform:scale(1.3)}
 }
 
-@keyframes floatHeart{
-0%,100%{transform:translateY(0)}
-50%{transform:translateY(-20px)}
-}
+/* MATRIX */
 
-/* LOADING */
-
-.loading{
+#matrix{
 position:fixed;
 top:0;
 left:0;
-width:100%;
-height:100%;
-background:#000;
-z-index:9999;
-
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-}
-
-.loading-text{
-font-size:2rem;
-color:#ff69b4;
-margin-top:20px;
-animation:pulseLoad 1.5s infinite;
-}
-
-@keyframes pulseLoad{
-0%,100%{opacity:0.3}
-50%{opacity:1}
+z-index:-1;
 }
 
 </style>
+
 </head>
 
 <body>
 
-<!-- MUSIC -->
-<audio id="bgMusic" loop>
+<!-- ПОДСКАЗКА -->
+
+<div class="hint" id="hint">
+КЛИКНИ 💐
+</div>
+
+<!-- МУЗЫКА -->
+
+<audio id="music" loop>
 <source src="music.mp3" type="audio/mpeg">
 </audio>
 
-<!-- LOADING -->
-
-<div class="loading" id="loading">
-
-<div style="font-size:4rem;">💐</div>
-
-<div class="loading-text">
-Загрузка сюрприза...
-</div>
-
-</div>
-
-<canvas id="matrix-canvas"></canvas>
-<canvas id="particles-canvas"></canvas>
+<canvas id="matrix"></canvas>
 
 <div class="content" id="content">
 
-<h1 class="title">💐 С 8 МАРТА! 💐</h1>
+<h1 class="title">С 8 МАРТА 💐</h1>
 
-<!-- PHOTO GALLERY -->
+<!-- СЛАЙДЕР -->
 
-<div class="gallery">
+<div class="slider">
 
-<div class="main-photo-container">
+<div class="slides" id="slides">
+
+<div class="slide">
 <img src="101.jpg">
 </div>
 
-<div class="main-photo-container">
+<div class="slide">
 <img src="102.jpg">
 </div>
 
-<div class="main-photo-container">
+<div class="slide">
 <img src="103.jpg">
 </div>
 
 </div>
 
-<div class="big-heart" id="bigHeart">
+</div>
+
+<div class="big-heart">
 💗
 </div>
 
@@ -238,45 +198,54 @@ animation:pulseLoad 1.5s infinite;
 
 <script>
 
-/* MUSIC */
+/* ПОДСКАЗКА */
 
-const music = document.getElementById("bgMusic")
+const hint = document.getElementById("hint")
+const content = document.getElementById("content")
+const music = document.getElementById("music")
 
-document.body.addEventListener("click",()=>{
+hint.addEventListener("click",()=>{
 
-music.volume = 0.5
+hint.style.display="none"
+
+content.style.display="flex"
+
+music.volume=0.5
 music.play()
 
-},{once:true})
-
-/* LOADING */
-
-setTimeout(()=>{
-
-gsap.to('#loading',{
-opacity:0,
-duration:1,
-onComplete:()=>{
-
-document.getElementById('loading').style.display='none'
-
-initAnimation()
-
-}
+startMatrix()
+startSlider()
 
 })
 
-},2000)
+/* СЛАЙДЕР */
+
+let slideIndex = 0
+
+function startSlider(){
+
+setInterval(()=>{
+
+slideIndex++
+
+if(slideIndex>2) slideIndex=0
+
+document.getElementById("slides").style.transform =
+`translateX(-${slideIndex*100}%)`
+
+},3000)
+
+}
 
 /* MATRIX */
 
-const canvas=document.getElementById("matrix-canvas")
-const ctx=canvas.getContext("2d")
+const canvas = document.getElementById("matrix")
+const ctx = canvas.getContext("2d")
 
 canvas.width=window.innerWidth
 canvas.height=window.innerHeight
 
-const letters="8МАРТА💐💗✨"
+const letters="8МАРТА💐💗"
 const fontSize=16
 
 const columns=canvas.width/fontSize
@@ -284,12 +253,10 @@ const columns=canvas.width/fontSize
 const drops=[]
 
 for(let i=0;i<columns;i++){
-
-drops[i]=Math.random()*-100
-
+drops[i]=1
 }
 
-function drawMatrix(){
+function draw(){
 
 ctx.fillStyle="rgba(0,0,0,0.05)"
 ctx.fillRect(0,0,canvas.width,canvas.height)
@@ -303,10 +270,8 @@ const text=letters[Math.floor(Math.random()*letters.length)]
 
 ctx.fillText(text,i*fontSize,drops[i]*fontSize)
 
-if(drops[i]*fontSize>canvas.height&&Math.random()>0.975){
-
+if(drops[i]*fontSize>canvas.height && Math.random()>0.975){
 drops[i]=0
-
 }
 
 drops[i]++
@@ -315,126 +280,8 @@ drops[i]++
 
 }
 
-/* PARTICLES */
-
-const pCanvas=document.getElementById("particles-canvas")
-const pCtx=pCanvas.getContext("2d")
-
-pCanvas.width=window.innerWidth
-pCanvas.height=window.innerHeight
-
-const particles=[]
-
-class Particle{
-
-constructor(){
-
-this.reset()
-
-}
-
-reset(){
-
-this.x=Math.random()*pCanvas.width
-this.y=Math.random()*pCanvas.height
-this.size=Math.random()*3+1
-
-this.speedX=Math.random()*2-1
-this.speedY=Math.random()*2-1
-
-this.life=Math.random()*100+100
-
-}
-
-update(){
-
-this.x+=this.speedX
-this.y+=this.speedY
-this.life--
-
-if(this.life<=0){
-
-this.reset()
-
-}
-
-}
-
-draw(){
-
-pCtx.fillStyle="#ff69b4"
-
-pCtx.beginPath()
-pCtx.arc(this.x,this.y,this.size,0,Math.PI*2)
-
-pCtx.fill()
-
-}
-
-}
-
-for(let i=0;i<100;i++){
-
-particles.push(new Particle())
-
-}
-
-function animateParticles(){
-
-pCtx.clearRect(0,0,pCanvas.width,pCanvas.height)
-
-particles.forEach(p=>{
-
-p.update()
-p.draw()
-
-})
-
-requestAnimationFrame(animateParticles)
-
-}
-
-animateParticles()
-
-/* START ANIMATION */
-
-function initAnimation(){
-
-setInterval(drawMatrix,35)
-
-gsap.to("#matrix-canvas",{opacity:0.4})
-
-gsap.to("#content",{
-
-display:"flex",
-opacity:1,
-duration:1
-
-})
-
-gsap.from(".gallery",{
-
-scale:0,
-duration:2,
-ease:"back.out(1.7)"
-
-})
-
-setTimeout(()=>{
-
-document.getElementById("bigHeart").style.display="block"
-
-gsap.from("#bigHeart",{
-
-scale:0,
-rotation:720,
-duration:2,
-ease:"back.out(2)"
-
-})
-
-},4000)
-
+function startMatrix(){
+setInterval(draw,35)
 }
 
 window.addEventListener("resize",()=>{
@@ -442,12 +289,10 @@ window.addEventListener("resize",()=>{
 canvas.width=window.innerWidth
 canvas.height=window.innerHeight
 
-pCanvas.width=window.innerWidth
-pCanvas.height=window.innerHeight
-
 })
 
 </script>
 
 </body>
 </html>
+```
